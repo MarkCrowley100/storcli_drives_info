@@ -350,8 +350,20 @@ function escHtml(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Auto-load on page open
+// Auto-load on page open, then refresh every 60 seconds
 loadData();
+setInterval(loadData, 60000);
+
+// Countdown to next refresh
+let countdown = 60;
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) countdown = 60;
+  const el = document.getElementById('status');
+  if (!el.innerHTML.includes('spinner')) {
+    el.textContent = el.textContent.replace(/ \(next refresh.*\)/, '') + ` (next refresh in ${countdown}s)`;
+  }
+}, 1000);
 </script>
 </body>
 </html>
