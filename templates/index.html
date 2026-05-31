@@ -185,7 +185,7 @@ function renderOverview() {
       const speed = ctrl['Device Interface'] ? ctrl['Device Interface'].replace(/^[A-Za-z]+-?/,'') : '';
       const model = dr['Model'] || '';
       const color = (state === 'Onln' || state === 'UGood') ? 'var(--green)' :
-                    (state === 'Offln' || state === 'UBad' || state === 'Offln') ? 'var(--red)' : 'var(--yellow)';
+                    (state === 'Offln' || state === 'Msng') ? 'var(--red)' : 'var(--yellow)';
       return `<div class="drive-row">
         <span>${dr.id || '?'}</span>
         <span>${intf}${speed ? '-'+speed : ''} ${media}</span>
@@ -297,7 +297,8 @@ function renderCompare() {
           // Highlight state differences
           let extra = '';
           if (f === 'State' && (val === 'Onln' || val === 'UGood')) extra = 'color:var(--green)';
-          else if (f === 'State' && val !== '—') extra = 'color:var(--red);font-weight:600';
+          else if (f === 'State' && (val === 'Offln' || val === 'Msng')) extra = 'color:var(--red);font-weight:600';
+          else if (f === 'State' && val !== '—') extra = 'color:var(--yellow);font-weight:600';
           html += `<td style="${style}${extra ? ';'+extra : ''}">${escHtml(val)}</td>`;
         });
       });
