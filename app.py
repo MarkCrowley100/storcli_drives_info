@@ -141,24 +141,40 @@ def _parse_drive_row(t):
 
 def _parse_pd_list(raw):
     drives = []
+    seen_ids = set()
 
     # Primary: summary PD LIST section (MegaRAID RAID controllers)
     for line in _section_lines(raw, "PD LIST"):
         d = _parse_drive_row(line.split())
         if d:
             drives.append(d)
+            seen_ids.add(d["id"])
 
-    # Fallback: individual drive mini-tables (IT-mode HBAs like SAS3008)
-    # Each drive has its own "EID:Slt ... / data-row" block under Physical Device Information
-    if not drives:
-        for m in re.finditer(
-            r'EID:Slt\s+DID\s+State.*?\n-+\n(.*?)\n-+',
-            raw, re.DOTALL
-        ):
-            for line in m.group(1).splitlines():
-                d = _parse_drive_row(line.split())
-                if d:
-                    drives.append(d)
+    # Always also scan individual drive mini-tables — needed for:
+    #   - IT-mode HBAs (no PD LIST at all)
+    #   - Multi-controller systems where extra controllers use mini-tables
+    # Determine controller context for each block so :0 on /c1 vs /c2 get distinct IDs.
+    for m in re.finditer(
+        r'EID:Slt\s+DID\s+State.*?\n-+\n(.*?)\n-+',
+        raw, re.DOTALL
+    ):
+        # Find the most recent "Controller = N" before this block
+        ctrl_m = None
+        for cm in re.finditer(r'^Controller = (\d+)\s*$', raw[:m.start()], re.MULTILINE):
+            ctrl_m = cm
+        ctrl_num = ctrl_m.group(1) if ctrl_m else "0"
+
+        for line in m.group(1).splitlines():
+            d = _parse_drive_row(line.split())
+            if not d:
+                continue
+            # For no-enclosure slots like ":0", prefix with controller number
+            if d["id"].startswith(":"):
+                d["id"] = f"c{ctrl_num}{d['id']}"
+                d["EID:Slt"] = d["id"]
+            if d["id"] not in seen_ids:
+                drives.append(d)
+                seen_ids.add(d["id"])
 
     return drives
 
