@@ -68,6 +68,7 @@
   .drive-list { padding: 8px 14px; }
   .drive-list .drive-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .drive-list .drive-row:last-child { border-bottom: none; }
+  .drive-list .drive-header { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--surface2); border-radius: 4px; padding: 3px 0; }
   .err-msg { color: var(--red); padding: 10px 14px; font-size: 12px; word-break: break-all; }
 
   /* ── Compare table ── */
@@ -206,6 +207,14 @@ function renderOverview() {
       ctrl[k] ? `<tr><td>${k}</td><td>${ctrl[k]}</td></tr>` : ''
     ).join('');
 
+    const driveHeader = drives.length ? `<div class="drive-row drive-header">
+        <span>Designation</span>
+        <span>Interface</span>
+        <span>Size</span>
+        <span>State</span>
+        <span>Model</span>
+      </div>` : '';
+
     const driveRows = drives.map(dr => {
       const state = dr['State'] || '?';
       const media = dr['Med'] || '';
@@ -216,7 +225,7 @@ function renderOverview() {
       const color = (state === 'Onln' || state === 'UGood') ? 'var(--green)' :
                     (state === 'Offln' || state === 'Msng') ? 'var(--red)' : 'var(--yellow)';
       return `<div class="drive-row">
-        <span>${dr.id || '?'}</span>
+        <span style="font-family:monospace">${driveDesig(dr)}</span>
         <span>${intf}${speed ? '-'+speed : ''} ${media}</span>
         <span>${size}</span>
         <span style="color:${color};font-weight:600">${state}</span>
@@ -231,7 +240,7 @@ function renderOverview() {
       </div>
       ${!isOk ? `<div class="err-msg">${escHtml(d.error)}</div>` : ''}
       ${ctrlRows ? `<table>${ctrlRows}</table>` : ''}
-      ${driveRows ? `<div class="drive-list">${driveRows}</div>` : (isOk ? '<div class="err-msg" style="color:var(--muted)">No drives parsed</div>' : '')}
+      ${driveRows ? `<div class="drive-list">${driveHeader}${driveRows}</div>` : (isOk ? '<div class="err-msg" style="color:var(--muted)">No drives parsed</div>' : '')}
     `;
     container.appendChild(card);
   });
@@ -373,6 +382,21 @@ function renderDetail() {
   });
 
   container.innerHTML = html || '<p style="color:var(--muted);padding:20px">No data. Click Refresh All first.</p>';
+}
+
+function driveDesig(dr) {
+  const id = dr['EID:Slt'] || dr['id'] || '';
+  let m;
+  // "c1:4"  → controller-prefixed, no enclosure
+  m = id.match(/^c(\d+):(\d+)$/);
+  if (m) return `c${m[1]}:d${m[2]}`;
+  // "19:0"  → enclosure:slot, controller 0
+  m = id.match(/^(\d+):(\d+)$/);
+  if (m) return `c0:e${m[1]}:d${m[2]}`;
+  // ":0"    → no enclosure, controller 0
+  m = id.match(/^:(\d+)$/);
+  if (m) return `c0:d${m[1]}`;
+  return id;
 }
 
 function escHtml(s) {
