@@ -53,7 +53,7 @@
   main { padding: 20px 24px; }
 
   /* ── Server cards (overview) ── */
-  #overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  #overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(620px, 1fr)); gap: 16px; }
   .server-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .server-card .card-header { background: var(--surface2); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
   .server-card .card-header h3 { font-size: 14px; font-weight: 600; }
@@ -66,7 +66,8 @@
   .server-card td:first-child { color: var(--muted); width: 45%; }
   .server-card td:last-child { font-weight: 500; word-break: break-word; }
   .drive-list { padding: 8px 14px; }
-  .drive-list .drive-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .drive-list .drive-row { display: grid; grid-template-columns: 120px 120px 95px 56px 1fr; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .drive-list .drive-row > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .drive-list .drive-row:last-child { border-bottom: none; }
   .drive-list .drive-header { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--surface2); border-radius: 4px; padding: 3px 0; }
   .err-msg { color: var(--red); padding: 10px 14px; font-size: 12px; word-break: break-all; }
