@@ -36,46 +36,46 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
 
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-  header h1 { font-size: 18px; font-weight: 600; color: var(--accent); }
-  header p { color: var(--muted); font-size: 13px; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 20px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 15px; font-weight: 600; color: var(--accent); }
+  header p { color: var(--muted); font-size: 11px; }
 
-  .toolbar { padding: 12px 24px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }
-  button { cursor: pointer; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 500; }
+  .toolbar { padding: 6px 20px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--border); background: var(--surface); }
+  button { cursor: pointer; border: none; border-radius: 5px; padding: 5px 12px; font-size: 12px; font-weight: 500; }
   #refreshBtn { background: var(--accent); color: #fff; }
   #refreshBtn:hover { background: #3a7aed; }
   #refreshBtn:disabled { background: var(--surface2); color: var(--muted); cursor: default; }
   .view-toggle button { background: var(--surface2); color: var(--muted); }
   .view-toggle button.active { background: var(--accent); color: #fff; }
-  #status { font-size: 12px; color: var(--muted); margin-left: auto; }
-  #themeBtn { background: var(--surface2); color: var(--text); padding: 7px 12px; font-size: 16px; line-height: 1; }
+  #status { font-size: 11px; color: var(--muted); margin-left: auto; }
+  #themeBtn { background: var(--surface2); color: var(--text); padding: 5px 10px; font-size: 14px; line-height: 1; }
 
-  main { padding: 20px 24px; }
+  main { padding: 12px 16px; }
 
   /* ── Server cards (overview) ── */
-  #overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(620px, 1fr)); gap: 16px; }
-  .server-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .server-card .card-header { background: var(--surface2); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
-  .server-card .card-header h3 { font-size: 14px; font-weight: 600; }
-  .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  #overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(620px, 1fr)); gap: 10px; }
+  .server-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .server-card .card-header { background: var(--surface2); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .server-card .card-header h3 { font-size: 13px; font-weight: 600; }
+  .badge { font-size: 10px; padding: 1px 7px; border-radius: 20px; font-weight: 600; }
   .badge-ok { background: #1a3a2a; color: var(--green); }
   .badge-err { background: #3a1a1a; color: var(--red); }
   .badge-loading { background: #2a2a1a; color: var(--yellow); }
   .server-card table { width: 100%; border-collapse: collapse; }
-  .server-card td { padding: 6px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .server-card td { padding: 3px 12px; border-bottom: 1px solid var(--border); font-size: 11px; }
   .server-card td:first-child { color: var(--muted); width: 45%; }
   .server-card td:last-child { font-weight: 500; word-break: break-word; }
-  .drive-list { padding: 8px 14px; }
-  .drive-list .drive-row { display: grid; grid-template-columns: 120px 120px 95px 56px 1fr; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .drive-list { padding: 4px 12px; }
+  .drive-list .drive-row { display: grid; grid-template-columns: 120px 120px 95px 56px 1fr; align-items: center; gap: 6px; padding: 2px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
   .drive-list .drive-row > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .drive-list .drive-row:last-child { border-bottom: none; }
-  .drive-list .drive-header { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--surface2); border-radius: 4px; padding: 3px 0; }
-  .err-msg { color: var(--red); padding: 10px 14px; font-size: 12px; word-break: break-all; }
+  .drive-list .drive-header { color: var(--muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--surface2); border-radius: 3px; padding: 2px 0; }
+  .err-msg { color: var(--red); padding: 6px 12px; font-size: 11px; word-break: break-all; }
 
   /* ── Compare table ── */
   #compare { overflow-x: auto; }
   .compare-table { border-collapse: collapse; min-width: 100%; }
-  .compare-table th, .compare-table td { border: 1px solid var(--border); padding: 7px 12px; text-align: left; font-size: 12px; white-space: nowrap; }
+  .compare-table th, .compare-table td { border: 1px solid var(--border); padding: 4px 10px; text-align: left; font-size: 11px; white-space: nowrap; }
   .compare-table th { background: var(--surface2); color: var(--accent); font-weight: 600; position: sticky; top: 0; }
   .compare-table tr:nth-child(even) td { background: var(--surface); }
   .compare-table tr:nth-child(odd) td { background: var(--bg); }
@@ -87,14 +87,14 @@
   /* ── Drive detail view ── */
   #detail { display: none; }
   #detail.active { display: block; }
-  .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-  .detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .detail-card h4 { background: var(--surface2); padding: 8px 14px; font-size: 13px; color: var(--accent); }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+  .detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .detail-card h4 { background: var(--surface2); padding: 5px 12px; font-size: 12px; color: var(--accent); }
   .detail-card table { width: 100%; border-collapse: collapse; }
-  .detail-card td { padding: 5px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .detail-card td { padding: 3px 10px; border-bottom: 1px solid var(--border); font-size: 11px; }
   .detail-card td:first-child { color: var(--muted); width: 50%; }
 
-  .section-header { font-size: 15px; font-weight: 600; margin: 20px 0 10px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .section-header { font-size: 13px; font-weight: 600; margin: 12px 0 6px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
 </style>
 </head>
 <body>
