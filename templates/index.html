@@ -371,13 +371,28 @@ function renderDetail() {
       return;
     }
 
+    const topFields = ['SN','WWN','Temperature','State','Size','Intf','Med','Model','Firmware Revision','DG','SeSz','SED','PI','Sp','Type','DID','Serial'];
     html += `<div class="detail-grid">`;
     drives.forEach(dr => {
-      const rows = Object.entries(dr)
-        .filter(([k]) => k !== 'id')
-        .map(([k,v]) => `<tr><td>${escHtml(k)}</td><td>${escHtml(v)}</td></tr>`)
-        .join('');
-      html += `<div class="detail-card"><h4>${escHtml(dr.id || '?')}</h4><table>${rows}</table></div>`;
+      const desig = driveDesig(dr);
+      const allKeys = Object.keys(dr).filter(k => k !== 'id' && k !== 'EID:Slt');
+      const ordered = [
+        ...topFields.filter(k => allKeys.includes(k)),
+        ...allKeys.filter(k => !topFields.includes(k)),
+      ];
+      const rows = ordered.map(k => {
+        const v = dr[k];
+        let style = '';
+        if (k === 'SN' || k === 'WWN') style = 'font-family:monospace;font-size:10px';
+        if (k === 'Temperature') style = 'color:var(--yellow)';
+        if (k === 'State') {
+          const ok = v === 'Onln' || v === 'UGood';
+          const bad = v === 'Offln' || v === 'Msng';
+          style = ok ? 'color:var(--green);font-weight:600' : bad ? 'color:var(--red);font-weight:600' : 'color:var(--yellow);font-weight:600';
+        }
+        return `<tr><td>${escHtml(k)}</td><td style="${style}">${escHtml(v)}</td></tr>`;
+      }).join('');
+      html += `<div class="detail-card"><h4>${escHtml(desig)} <span style="color:var(--muted);font-weight:400;font-size:10px">${escHtml(dr['EID:Slt']||'')}</span></h4><table>${rows}</table></div>`;
     });
     html += `</div>`;
   });

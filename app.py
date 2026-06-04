@@ -9,7 +9,8 @@ app = Flask(__name__)
 SERVERS = ["mcserver", "mcvmh1", "mcnas", "mcnas2", "workpc"]
 
 SSH_KEY_PATH = "/home/storcli/.ssh/id_rsa"
-STORCLI_CMD = "storcli64 /call show all"
+# Chain summary + per-drive detail in one SSH call; split on the sentinel
+STORCLI_CMD = "storcli64 /call show all && echo ---DETAIL--- && storcli64 /call/eall/sall show all"
 
 SERVER_USER = {
     "mcserver": "plex",
@@ -20,6 +21,7 @@ SERVER_USER = {
 }
 
 SERVER_CMD = {
+    # workpc IT-mode: /call show all already embeds per-drive detail (SN etc.)
     "workpc": "sudo storcli64 /call show all",
 }
 
@@ -47,6 +49,43 @@ def run_storcli(hostname):
         return {"status": "error", "raw": "", "error": str(e), "source": "unknown"}
     finally:
         client.close()
+
+
+def _parse_serials(raw):
+    """Return dict of {drive_id: {SN, WWN, Firmware Revision, Temperature}} from storcli detail output."""
+    serials = {}
+    detail_fields = {
+        "SN":                r'SN\s*=\s*(\S+)',
+        "WWN":               r'WWN\s*=\s*(\S+)',
+        "Firmware Revision": r'Firmware Revision\s*=\s*(\S+)',
+        "Temperature":       r'Drive Temperature\s*=\s*([^\n]+)',
+    }
+
+    # Split into per-drive blocks: a block starts with "Drive /c.../e.../s... :" or "Drive /c.../s... :"
+    # and runs until the next such header line.
+    block_pat = re.compile(r'^Drive /c(\d+)/(?:e(\d+)/)?s(\d+)\s*:', re.MULTILINE)
+    starts = [(m.start(), m.group(1), m.group(2), m.group(3))
+              for m in block_pat.finditer(raw)]
+
+    for i, (pos, ctrl, enc, slot) in enumerate(starts):
+        end = starts[i + 1][0] if i + 1 < len(starts) else len(raw)
+        block = raw[pos:end]
+
+        if enc:
+            drive_id = f"{enc}:{slot}"          # MegaRAID: "19:0"
+        else:
+            drive_id = f"c{ctrl}:{slot}"        # IT-mode:  "c0:0"
+
+        info = {}
+        for key, pat in detail_fields.items():
+            fm = re.search(pat, block)
+            if fm:
+                info[key] = fm.group(1).strip()
+        if info:
+            # Merge into existing entry (multiple blocks per drive in detail output)
+            serials.setdefault(drive_id, {}).update(info)
+
+    return serials
 
 
 def parse_lsblk_output(raw):
@@ -211,8 +250,13 @@ def parse_storcli_output(raw):
 
     raw = raw.replace("\r\n", "\n").replace("\r", "\n")
 
+    # Split chained output: first part = /call show all, second = /call/eall/sall show all
+    parts = raw.split("---DETAIL---", 1)
+    main_raw   = parts[0]
+    detail_raw = parts[1] if len(parts) > 1 else raw  # workpc has detail in main output
+
     # Controller key=value info (only curated fields to avoid noise)
-    for line in raw.splitlines():
+    for line in main_raw.splitlines():
         m = re.match(r'^([A-Za-z][A-Za-z0-9 /]+?)\s*=\s*(.+)$', line.strip())
         if m:
             key = m.group(1).strip()
@@ -220,8 +264,15 @@ def parse_storcli_output(raw):
             if key in CTRL_FIELDS and val:
                 result["controller_info"][key] = val
 
-    result["drives"]  = _parse_pd_list(raw)
-    result["vdrives"] = _parse_vd_list(raw)
+    result["drives"]  = _parse_pd_list(raw)   # needs full raw for IT-mode blocks
+    result["vdrives"] = _parse_vd_list(main_raw)
+
+    # Merge serial numbers and detail fields into each drive
+    serials = _parse_serials(detail_raw)
+    for d in result["drives"]:
+        drive_id = d.get("EID:Slt") or d.get("id", "")
+        if drive_id in serials:
+            d.update(serials[drive_id])
 
     return result
 
