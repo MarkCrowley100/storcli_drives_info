@@ -86,7 +86,14 @@ def _parse_serials(raw):
                 info[key] = fm.group(1).strip()
         lb = logical_blocks_pat.search(block)
         if lb:
-            info["Logical Blocks"] = str(int(lb.group(1), 16))
+            blocks = int(lb.group(1), 16)
+            # On MegaRAID controllers this hex value is the sector COUNT, but on
+            # IT-mode HBAs (no enclosure — "c#:slot" drives) storcli instead reports
+            # the drive's max LBA (count - 1, zero-indexed). Normalize IT-mode so
+            # both report a true block count. Skip the not-ready/0-capacity case.
+            if not enc and blocks > 0:
+                blocks += 1
+            info["Logical Blocks"] = str(blocks)
         if info:
             # Merge into existing entry (multiple blocks per drive in detail output)
             serials.setdefault(drive_id, {}).update(info)
