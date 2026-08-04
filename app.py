@@ -52,7 +52,7 @@ def run_storcli(hostname):
 
 
 def _parse_serials(raw):
-    """Return dict of {drive_id: {SN, WWN, Firmware Revision, Temperature}} from storcli detail output."""
+    """Return dict of {drive_id: {SN, WWN, Firmware Revision, Temperature, Logical Blocks}} from storcli detail output."""
     serials = {}
     detail_fields = {
         "SN":                r'SN\s*=\s*(\S+)',
@@ -60,6 +60,9 @@ def _parse_serials(raw):
         "Firmware Revision": r'Firmware Revision\s*=\s*(\S+)',
         "Temperature":       r'Drive Temperature\s*=\s*([^\n]+)',
     }
+    # "Raw size = 1.819 TB [0xe8e088b0 Sectors]" — the hex value is the drive's
+    # total logical block (sector) count, regardless of where storcli puts the brackets.
+    logical_blocks_pat = re.compile(r'Raw size\s*=.*?\[(0x[0-9A-Fa-f]+)(?:\s*Sectors)?\]')
 
     # Split into per-drive blocks: a block starts with "Drive /c.../e.../s... :" or "Drive /c.../s... :"
     # and runs until the next such header line.
@@ -81,6 +84,9 @@ def _parse_serials(raw):
             fm = re.search(pat, block)
             if fm:
                 info[key] = fm.group(1).strip()
+        lb = logical_blocks_pat.search(block)
+        if lb:
+            info["Logical Blocks"] = str(int(lb.group(1), 16))
         if info:
             # Merge into existing entry (multiple blocks per drive in detail output)
             serials.setdefault(drive_id, {}).update(info)

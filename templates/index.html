@@ -371,11 +371,13 @@ function renderDetail() {
       return;
     }
 
-    const topFields = ['SN','WWN','Temperature','State','Size','Intf','Med','Model','Firmware Revision','DG','SeSz','SED','PI','Sp','Type','DID','Serial'];
+    const topFields = ['SN','WWN','Temperature','State','Logical Blocks','Size','Intf','Med','Model','Firmware Revision','DG','SeSz','SED','PI','Sp','Type','DID','Serial'];
     html += `<div class="detail-grid">`;
     drives.forEach(dr => {
       const desig = driveDesig(dr);
-      const allKeys = Object.keys(dr).filter(k => k !== 'id' && k !== 'EID:Slt');
+      // Prefer showing Logical Blocks over Size when both are known.
+      const dropSize = 'Logical Blocks' in dr;
+      const allKeys = Object.keys(dr).filter(k => k !== 'id' && k !== 'EID:Slt' && !(dropSize && k === 'Size'));
       const ordered = [
         ...topFields.filter(k => allKeys.includes(k)),
         ...allKeys.filter(k => !topFields.includes(k)),
