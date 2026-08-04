@@ -265,8 +265,15 @@ def parse_storcli_output(raw):
 
     # Split chained output: first part = /call show all, second = /call/eall/sall show all
     parts = raw.split("---DETAIL---", 1)
-    main_raw   = parts[0]
-    detail_raw = parts[1] if len(parts) > 1 else raw  # workpc has detail in main output
+    main_raw = parts[0]
+    if len(parts) > 1:
+        # /call/eall/sall fails outright ("No Enclosure found") for enclosure-less
+        # controllers (e.g. onboard SATA on a multi-controller box) — but their
+        # per-drive Device attributes block (SN/WWN/Raw size) is already present
+        # in main_raw regardless, so scan both to avoid losing that data.
+        detail_raw = main_raw + "\n" + parts[1]
+    else:
+        detail_raw = raw  # workpc has detail in main output
 
     # Controller key=value info (only curated fields to avoid noise)
     for line in main_raw.splitlines():
