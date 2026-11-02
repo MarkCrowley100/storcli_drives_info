@@ -127,6 +127,7 @@
 const SERVERS = {{ servers | tojson }};
 let currentData = {};
 let currentView = 'overview';
+const isBadState = s => s === 'Offln' || s === 'Msng' || s === 'Failed';
 
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
@@ -224,7 +225,7 @@ function renderOverview() {
       const speed = ctrl['Device Interface'] ? ctrl['Device Interface'].replace(/^[A-Za-z]+-?/,'') : '';
       const model = dr['Model'] || '';
       const color = (state === 'Onln' || state === 'UGood') ? 'var(--green)' :
-                    (state === 'Offln' || state === 'Msng') ? 'var(--red)' : 'var(--yellow)';
+                    isBadState(state) ? 'var(--red)' : 'var(--yellow)';
       return `<div class="drive-row">
         <span style="font-family:monospace">${driveDesig(dr)}</span>
         <span>${intf}${speed ? '-'+speed : ''} ${media}</span>
@@ -303,8 +304,8 @@ function renderCompare() {
   const stateRows = [
     { label: 'Total drives', vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).length) || '0') },
     { label: 'Online',  vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.State==='Onln').length))  },
-    { label: 'Offline', vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.State==='Offln').length)) },
-    { label: 'Other',   vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.State!=='Onln'&&d.State!=='Offln').length)) },
+    { label: 'Offline', vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>isBadState(d.State)).length)) },
+    { label: 'Other',   vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.State!=='Onln'&&!isBadState(d.State)).length)) },
     { label: 'HDD',  vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.Med==='HDD').length)) },
     { label: 'SSD',  vals: SERVERS.map(h => String((currentData[h]?.parsed?.drives||[]).filter(d=>d.Med==='SSD').length)) },
   ];
@@ -336,7 +337,7 @@ function renderCompare() {
           // Highlight state differences
           let extra = '';
           if (f === 'State' && (val === 'Onln' || val === 'UGood')) extra = 'color:var(--green)';
-          else if (f === 'State' && (val === 'Offln' || val === 'Msng')) extra = 'color:var(--red);font-weight:600';
+          else if (f === 'State' && isBadState(val)) extra = 'color:var(--red);font-weight:600';
           else if (f === 'State' && val !== '—') extra = 'color:var(--yellow);font-weight:600';
           html += `<td style="${style}${extra ? ';'+extra : ''}">${escHtml(val)}</td>`;
         });
@@ -389,7 +390,7 @@ function renderDetail() {
         if (k === 'Temperature') style = 'color:var(--yellow)';
         if (k === 'State') {
           const ok = v === 'Onln' || v === 'UGood';
-          const bad = v === 'Offln' || v === 'Msng';
+          const bad = isBadState(v);
           style = ok ? 'color:var(--green);font-weight:600' : bad ? 'color:var(--red);font-weight:600' : 'color:var(--yellow);font-weight:600';
         }
         return `<tr><td>${escHtml(k)}</td><td style="${style}">${escHtml(v)}</td></tr>`;
